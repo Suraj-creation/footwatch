@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any, Dict, Optional
 
 from fastapi import Body, FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,12 +60,12 @@ def get_live_cameras():
 @app.get("/v1/violations")
 def list_violations(
     limit: int = Query(default=50, ge=1, le=200),
-    camera_id: str | None = Query(default=None),
-    plate: str | None = Query(default=None),
-    vehicle_class: str | None = Query(default=None, alias="class"),
-    status: str | None = Query(default=None),
-    from_ts: str | None = Query(default=None, alias="from"),
-    to_ts: str | None = Query(default=None, alias="to"),
+    camera_id: Optional[str] = Query(default=None),
+    plate: Optional[str] = Query(default=None),
+    vehicle_class: Optional[str] = Query(default=None, alias="class"),
+    status: Optional[str] = Query(default=None),
+    from_ts: Optional[str] = Query(default=None, alias="from"),
+    to_ts: Optional[str] = Query(default=None, alias="to"),
 ):
     request_id = str(uuid.uuid4())
     filters = {
@@ -136,6 +137,6 @@ def get_edge_config():
 
 
 @app.put("/v1/edge/config")
-def put_edge_config(payload: dict = Body(default_factory=dict)):
+def put_edge_config(payload: Dict[str, Any] = Body(default_factory=dict)):
     request_id = str(uuid.uuid4())
     return ok(handle_put_edge_config(edge_repo, payload), request_id)

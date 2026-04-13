@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from services.common.config import load_settings
 
@@ -12,11 +12,11 @@ class ViolationsReadRepository:
         settings = load_settings()
         self._path: Path = settings.local_data_dir / "violations.jsonl"
 
-    def _load_all(self) -> list[dict[str, Any]]:
+    def _load_all(self) -> List[Dict[str, Any]]:
         if not self._path.exists():
             return []
 
-        items: list[dict[str, Any]] = []
+        items: List[Dict[str, Any]] = []
         with self._path.open("r", encoding="utf-8") as handle:
             for line in handle:
                 line = line.strip()
@@ -27,7 +27,7 @@ class ViolationsReadRepository:
         items.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
         return items
 
-    def list_all(self, limit: int = 50, filters: dict[str, str] | None = None) -> list[dict[str, Any]]:
+    def list_all(self, limit: int = 50, filters: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
         items = self._load_all()
 
         if filters:
@@ -38,7 +38,7 @@ class ViolationsReadRepository:
             from_ts = filters.get("from")
             to_ts = filters.get("to")
 
-            def matches(item: dict[str, Any]) -> bool:
+            def matches(item: Dict[str, Any]) -> bool:
                 location = item.get("location", {})
                 vehicle = item.get("vehicle", {})
 
@@ -66,13 +66,13 @@ class ViolationsReadRepository:
 
         return items[:limit]
 
-    def by_id(self, violation_id: str) -> dict | None:
+    def by_id(self, violation_id: str) -> Optional[Dict[str, Any]]:
         for item in self.list_all(limit=10_000):
             if item.get("violation_id") == violation_id:
                 return item
         return None
 
-    def summary(self) -> dict[str, Any]:
+    def summary(self) -> Dict[str, Any]:
         items = self._load_all()
         if not items:
             return {
@@ -84,11 +84,11 @@ class ViolationsReadRepository:
                 "by_hour": {},
             }
 
-        plates: set[str] = set()
-        speed_values: list[float] = []
-        conf_values: list[float] = []
-        by_class: dict[str, int] = {}
-        by_hour: dict[str, int] = {}
+        plates = set()
+        speed_values: List[float] = []
+        conf_values: List[float] = []
+        by_class: Dict[str, int] = {}
+        by_hour: Dict[str, int] = {}
 
         for item in items:
             vehicle = item.get("vehicle", {})

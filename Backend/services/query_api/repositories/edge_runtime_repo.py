@@ -4,12 +4,12 @@ import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 from services.common.config import load_settings
 
 
-DEFAULT_LAB_CONFIG: dict[str, Any] = {
+DEFAULT_LAB_CONFIG: Dict[str, Any] = {
     "cameraId": "FP_CAM_001",
     "locationName": "Sample Junction",
     "gpsLat": "12.9716",
@@ -44,7 +44,7 @@ class EdgeRuntimeRepository:
         self._ingest_cfg_path: Path = self._config_dir / "backend_ingest.json"
         self._lab_cfg_path: Path = self._config_dir / "frontend_camera_lab.json"
 
-    def _load_json(self, path: Path, fallback: dict[str, Any]) -> dict[str, Any]:
+    def _load_json(self, path: Path, fallback: Dict[str, Any]) -> Dict[str, Any]:
         if not path.exists():
             return fallback
 
@@ -57,21 +57,21 @@ class EdgeRuntimeRepository:
         except Exception:
             return fallback
 
-    def _save_json(self, path: Path, payload: dict[str, Any]) -> None:
+    def _save_json(self, path: Path, payload: Dict[str, Any]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         temp_path = path.with_suffix(path.suffix + ".tmp")
         with temp_path.open("w", encoding="utf-8") as handle:
             json.dump(payload, handle, indent=2)
         temp_path.replace(path)
 
-    def _file_timestamp(self, path: Path) -> str | None:
+    def _file_timestamp(self, path: Path) -> Optional[str]:
         if not path.exists():
             return None
 
         stat = path.stat()
         return datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).isoformat()
 
-    def _file_age_seconds(self, path: Path) -> float | None:
+    def _file_age_seconds(self, path: Path) -> Optional[float]:
         if not path.exists():
             return None
 
@@ -105,7 +105,7 @@ class EdgeRuntimeRepository:
                 return False
         return fallback
 
-    def _resolve_config(self) -> dict[str, Any]:
+    def _resolve_config(self) -> Dict[str, Any]:
         footpath = self._load_json(self._footpath_cfg_path, {})
         speed = self._load_json(self._speed_cfg_path, {})
         dashboard = self._load_json(self._dashboard_cfg_path, {})
@@ -147,7 +147,7 @@ class EdgeRuntimeRepository:
             },
         }
 
-    def get_runtime_status(self) -> dict[str, Any]:
+    def get_runtime_status(self) -> Dict[str, Any]:
         metrics = self._load_json(self._metrics_path, {})
         metrics_age_sec = self._file_age_seconds(self._metrics_path)
         preview_age_sec = self._file_age_seconds(self._preview_frame_path)
@@ -174,7 +174,7 @@ class EdgeRuntimeRepository:
             "metrics": metrics,
         }
 
-    def get_preview_frame_bytes(self) -> bytes | None:
+    def get_preview_frame_bytes(self) -> Optional[bytes]:
         if not self._preview_frame_path.exists():
             return None
 
@@ -183,14 +183,14 @@ class EdgeRuntimeRepository:
         except Exception:
             return None
 
-    def get_config(self) -> dict[str, Any]:
+    def get_config(self) -> Dict[str, Any]:
         payload = self._resolve_config()
         payload["edge_root"] = str(self._edge_root)
         payload["edge_root_exists"] = self._edge_root.exists()
         payload["updated_at"] = datetime.now(timezone.utc).isoformat()
         return payload
 
-    def update_config(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def update_config(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         current = self._resolve_config()
         merged = {
             **current["resolved"],

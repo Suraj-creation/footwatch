@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from jsonschema import ValidationError, validate
 
 from services.common.errors import ApiError
 
 
-def load_schema(schema_name: str) -> dict[str, Any]:
+def load_schema(schema_name: str) -> Dict[str, Any]:
     schema_path = Path(__file__).resolve().parents[1] / "contracts" / "schemas" / schema_name
     with schema_path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 
 
-def validate_payload(payload: dict[str, Any], schema_name: str) -> None:
+def validate_payload(payload: Dict[str, Any], schema_name: str) -> None:
     schema = load_schema(schema_name)
     try:
         validate(instance=payload, schema=schema)

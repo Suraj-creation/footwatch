@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from services.common.config import load_settings
 
 
-def handle_post_evidence_complete(violation_id: str, payload: dict[str, Any]) -> dict:
+def handle_post_evidence_complete(violation_id: str, payload: Dict[str, Any]) -> dict:
     settings = load_settings()
     path: Path = settings.local_data_dir / "evidence_complete.jsonl"
     enriched = {

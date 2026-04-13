@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Dict, List
 
 from services.common.config import load_settings
 
@@ -11,7 +12,7 @@ class LiveStateReadRepository:
         settings = load_settings()
         self._path: Path = settings.local_data_dir / "camera_live_state.json"
 
-    def list_all(self) -> list[dict]:
+    def list_all(self) -> List[Dict]:
         if not self._path.exists():
             return []
 

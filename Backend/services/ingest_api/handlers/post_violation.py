@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, Optional
 
 from services.common.errors import ApiError
 from services.common.idempotency import payload_hash
@@ -10,8 +10,8 @@ from services.ingest_api.repositories.violation_queue_repo import ViolationQueue
 
 
 def handle_post_violation(
-    payload: dict[str, Any],
-    idempotency_key: str | None,
+    payload: Dict[str, Any],
+    idempotency_key: Optional[str],
     queue_repo: ViolationQueueRepository,
     idempotency_repo: IdempotencyRepository,
 ) -> dict:

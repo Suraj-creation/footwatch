@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 
 class EvidenceRepository:
-    def build_signed_url(self, violation_id: str, evidence_type: str, violation: dict[str, Any] | None = None) -> dict:
+    def build_signed_url(self, violation_id: str, evidence_type: str, violation: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
 
         if violation:

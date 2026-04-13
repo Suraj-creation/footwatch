@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, Header, Request
 from fastapi.responses import JSONResponse
@@ -32,7 +32,7 @@ async def api_error_handler(_: Request, exc: ApiError):
 
 
 @app.post("/v1/telemetry")
-def post_telemetry(payload: dict[str, Any], x_api_key: str | None = Header(default=None)):
+def post_telemetry(payload: Dict[str, Any], x_api_key: Optional[str] = Header(default=None)):
     validate_ingest_api_key(x_api_key)
     request_id = str(uuid.uuid4())
     logger.info("telemetry_ingest camera_id=%s", payload.get("camera_id"))
@@ -42,9 +42,9 @@ def post_telemetry(payload: dict[str, Any], x_api_key: str | None = Header(defau
 
 @app.post("/v1/violations", status_code=201)
 def post_violation(
-    payload: dict[str, Any],
-    x_api_key: str | None = Header(default=None),
-    x_idempotency_key: str | None = Header(default=None),
+    payload: Dict[str, Any],
+    x_api_key: Optional[str] = Header(default=None),
+    x_idempotency_key: Optional[str] = Header(default=None),
 ):
     validate_ingest_api_key(x_api_key)
     request_id = str(uuid.uuid4())
@@ -56,8 +56,8 @@ def post_violation(
 @app.post("/v1/violations/{violation_id}/evidence-complete")
 def post_evidence_complete(
     violation_id: str,
-    payload: dict[str, Any],
-    x_api_key: str | None = Header(default=None),
+    payload: Dict[str, Any],
+    x_api_key: Optional[str] = Header(default=None),
 ):
     validate_ingest_api_key(x_api_key)
     request_id = str(uuid.uuid4())

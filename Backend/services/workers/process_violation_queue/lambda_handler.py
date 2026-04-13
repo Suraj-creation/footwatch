@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Dict, List
 
 from services.workers.process_violation_queue.handler import process_queue_once
 from services.workers.process_violation_queue.services.alert_publisher import publish_alert
@@ -9,7 +9,7 @@ from services.workers.process_violation_queue.services.violation_normalizer impo
 from services.workers.process_violation_queue.services.violation_persister import ViolationPersister
 
 
-def _process_records(records: list[dict[str, Any]]) -> int:
+def _process_records(records: List[Dict[str, Any]]) -> int:
     persister = ViolationPersister()
     processed = 0
 
@@ -27,7 +27,7 @@ def _process_records(records: list[dict[str, Any]]) -> int:
     return processed
 
 
-def handler(event: dict[str, Any], _context: Any) -> dict[str, int]:
+def handler(event: Dict[str, Any], _context: Any) -> Dict[str, int]:
     records = event.get("Records", []) if isinstance(event, dict) else []
 
     if records:
