@@ -4,13 +4,22 @@ data "archive_file" "backend_bundle" {
 	output_path = "${path.module}/build/backend_bundle.zip"
 	excludes = [
 		".git",
+		".local",
 		".pytest_cache",
 		".venv",
+		"infra/terraform/backend.hcl",
+		"infra/terraform/terraform.tfvars",
+		"infra/terraform/tfplan*",
+		"infra/terraform/plan*.txt",
 		"infra/terraform/.terraform",
 		"infra/terraform/build",
 		"**/__pycache__/**",
 		"**/*.pyc",
 	]
+}
+
+locals {
+	effective_ingest_api_key = var.local_mode ? "dev-local-ingest-key" : var.ingest_api_key
 }
 
 resource "aws_lambda_function" "ingest_api" {
@@ -23,6 +32,10 @@ resource "aws_lambda_function" "ingest_api" {
 	timeout          = var.lambda_timeout_seconds
 	memory_size      = var.lambda_memory_mb
 
+	tracing_config {
+		mode = "Active"
+	}
+
 	environment {
 		variables = {
 			FW_ENV                   = var.environment
@@ -32,11 +45,13 @@ resource "aws_lambda_function" "ingest_api" {
 			FW_IDEMPOTENCY_TABLE     = aws_dynamodb_table.idempotency_records.name
 			FW_VIOLATION_QUEUE_URL   = aws_sqs_queue.violation_ingest_queue.url
 			FW_EVIDENCE_BUCKET       = aws_s3_bucket.evidence.id
-			FW_INGEST_API_KEY        = "replace-in-secrets-manager"
+			FW_INGEST_API_KEY        = local.effective_ingest_api_key
 		}
 	}
 
 	tags = local.common_tags
+
+	depends_on = [aws_cloudwatch_log_group.ingest_api]
 }
 
 resource "aws_lambda_function" "query_api" {
@@ -49,6 +64,10 @@ resource "aws_lambda_function" "query_api" {
 	timeout          = var.lambda_timeout_seconds
 	memory_size      = var.lambda_memory_mb
 
+	tracing_config {
+		mode = "Active"
+	}
+
 	environment {
 		variables = {
 			FW_ENV                   = var.environment
@@ -58,11 +77,13 @@ resource "aws_lambda_function" "query_api" {
 			FW_IDEMPOTENCY_TABLE     = aws_dynamodb_table.idempotency_records.name
 			FW_VIOLATION_QUEUE_URL   = aws_sqs_queue.violation_ingest_queue.url
 			FW_EVIDENCE_BUCKET       = aws_s3_bucket.evidence.id
-			FW_INGEST_API_KEY        = "replace-in-secrets-manager"
+			FW_INGEST_API_KEY        = local.effective_ingest_api_key
 		}
 	}
 
 	tags = local.common_tags
+
+	depends_on = [aws_cloudwatch_log_group.query_api]
 }
 
 resource "aws_lambda_function" "worker" {
@@ -72,8 +93,12 @@ resource "aws_lambda_function" "worker" {
 	handler          = "services.workers.process_violation_queue.lambda_handler.handler"
 	filename         = data.archive_file.backend_bundle.output_path
 	source_code_hash = data.archive_file.backend_bundle.output_base64sha256
-	timeout          = 60
-	memory_size      = 1024
+	timeout          = var.worker_timeout_seconds
+	memory_size      = var.worker_memory_mb
+
+	tracing_config {
+		mode = "Active"
+	}
 
 	environment {
 		variables = {
@@ -84,11 +109,13 @@ resource "aws_lambda_function" "worker" {
 			FW_IDEMPOTENCY_TABLE     = aws_dynamodb_table.idempotency_records.name
 			FW_VIOLATION_QUEUE_URL   = aws_sqs_queue.violation_ingest_queue.url
 			FW_EVIDENCE_BUCKET       = aws_s3_bucket.evidence.id
-			FW_INGEST_API_KEY        = "replace-in-secrets-manager"
+			FW_INGEST_API_KEY        = local.effective_ingest_api_key
 		}
 	}
 
 	tags = local.common_tags
+
+	depends_on = [aws_cloudwatch_log_group.worker]
 }
 
 resource "aws_lambda_event_source_mapping" "worker_queue" {

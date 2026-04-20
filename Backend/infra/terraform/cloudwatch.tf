@@ -1,17 +1,23 @@
 resource "aws_cloudwatch_log_group" "ingest_api" {
-	name              = "/aws/lambda/${aws_lambda_function.ingest_api.function_name}"
+	name              = "/aws/lambda/${local.name_prefix}-ingest-api"
 	retention_in_days = var.log_retention_days
 	tags              = local.common_tags
 }
 
 resource "aws_cloudwatch_log_group" "query_api" {
-	name              = "/aws/lambda/${aws_lambda_function.query_api.function_name}"
+	name              = "/aws/lambda/${local.name_prefix}-query-api"
 	retention_in_days = var.log_retention_days
 	tags              = local.common_tags
 }
 
 resource "aws_cloudwatch_log_group" "worker" {
-	name              = "/aws/lambda/${aws_lambda_function.worker.function_name}"
+	name              = "/aws/lambda/${local.name_prefix}-worker"
+	retention_in_days = var.log_retention_days
+	tags              = local.common_tags
+}
+
+resource "aws_cloudwatch_log_group" "http_api_access" {
+	name              = "/aws/apigateway/${local.name_prefix}-http-api"
 	retention_in_days = var.log_retention_days
 	tags              = local.common_tags
 }
