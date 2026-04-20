@@ -52,6 +52,7 @@ data "aws_iam_policy_document" "lambda_access" {
 			"sqs:SendMessage",
 			"sqs:ReceiveMessage",
 			"sqs:DeleteMessage",
+			"sqs:ChangeMessageVisibility",
 			"sqs:GetQueueAttributes",
 		]
 		resources = [
@@ -61,13 +62,38 @@ data "aws_iam_policy_document" "lambda_access" {
 	}
 
 	statement {
+		sid = "XRayAccess"
+		actions = [
+			"xray:PutTraceSegments",
+			"xray:PutTelemetryRecords",
+		]
+		resources = ["*"]
+	}
+
+	dynamic "statement" {
+		for_each = var.evidence_bucket_kms_key_arn == null ? [] : [var.evidence_bucket_kms_key_arn]
+		content {
+			sid = "KmsForEvidenceBucket"
+			actions = [
+				"kms:Decrypt",
+				"kms:Encrypt",
+				"kms:GenerateDataKey",
+			]
+			resources = [statement.value]
+		}
+	}
+
+	statement {
 		sid = "CloudWatchLogs"
 		actions = [
-			"logs:CreateLogGroup",
 			"logs:CreateLogStream",
 			"logs:PutLogEvents",
 		]
-		resources = ["arn:aws:logs:*:*:*"]
+		resources = [
+			"${aws_cloudwatch_log_group.ingest_api.arn}:*",
+			"${aws_cloudwatch_log_group.query_api.arn}:*",
+			"${aws_cloudwatch_log_group.worker.arn}:*",
+		]
 	}
 }
 
