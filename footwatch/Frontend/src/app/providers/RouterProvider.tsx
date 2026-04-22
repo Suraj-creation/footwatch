@@ -1,4 +1,4 @@
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 import { ReactNode } from 'react'
 
 type RouterProviderProps = {
@@ -6,5 +6,5 @@ type RouterProviderProps = {
 }
 
 export function RouterProvider({ children }: RouterProviderProps) {
-  return <BrowserRouter>{children}</BrowserRouter>
+  return <HashRouter>{children}</HashRouter>
 }

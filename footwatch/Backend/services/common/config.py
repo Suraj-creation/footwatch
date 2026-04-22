@@ -19,7 +19,13 @@ class Settings:
 
     @property
     def local_data_dir(self) -> Path:
-        directory = self.project_root / ".local"
+        configured = os.getenv("FW_LOCAL_DATA_DIR")
+        if configured:
+            directory = Path(configured)
+        elif os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+            directory = Path("/tmp") / "footwatch" / ".local"
+        else:
+            directory = self.project_root / ".local"
         directory.mkdir(parents=True, exist_ok=True)
         return directory
 

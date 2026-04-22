@@ -1,5 +1,5 @@
 {
-  "broker_host": "YOUR-ENDPOINT.iot.ap-south-1.amazonaws.com",
+  "broker_host": "a26ix7882z43xd-ats.iot.ap-south-1.amazonaws.com",
   "broker_port": 8883,
   "client_id": "fw-edge-001",
   "cert_dir": "/certs",
