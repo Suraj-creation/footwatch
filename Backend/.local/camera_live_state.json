@@ -1,14 +1,13 @@
 {
   "FP_CAM_001": {
     "camera_id": "FP_CAM_001",
-    "timestamp": "2026-04-16T18:45:17.534792+00:00",
+    "timestamp": "2026-01-01T12:00:00Z",
+    "fps": 12.5,
+    "latency_ms": 82.0,
     "status": "online",
-    "fps": 1.2038646017417172,
-    "latency_ms": 830.6581974029541,
-    "reconnects": 0,
-    "frame_failures": 0,
-    "last_seen_ts": "2026-04-16T18:45:17.534792+00:00",
-    "expires_at": 1776365297
+    "location_name": "Sample Junction",
+    "last_seen_ts": "2026-01-01T12:00:00Z",
+    "expires_at": 1776763215
   },
   "FP_CAM_TEST": {
     "camera_id": "FP_CAM_TEST",

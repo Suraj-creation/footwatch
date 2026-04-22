@@ -22,6 +22,7 @@ MODELS_DIR = PROJECT_ROOT / "models"
 FRONTEND_LAB_CONFIG = CONFIG_DIR / "frontend_camera_lab.json"
 METRICS_FILE = PROJECT_ROOT / ".metrics.json"
 PREVIEW_FILE = PROJECT_ROOT / ".preview_annotated.jpg"
+VIOLATIONS_DIR = PROJECT_ROOT / "violations"
 
 GENERAL_MODEL_PATH = MODELS_DIR / "hf_cache" / "yolov8n.pt"
 ENFORCEMENT_MODEL_PATH = MODELS_DIR / "twowheeler_yolov8n.pt"
@@ -106,6 +107,40 @@ def export_preview_frame(frame: np.ndarray) -> None:
             temp_file.replace(PREVIEW_FILE)
     except Exception:
         pass
+
+
+def save_violation_evidence(
+    violation_id: str,
+    frame: np.ndarray,
+    vehicle_crop: np.ndarray,
+    plate_raw: np.ndarray,
+    plate_enhanced: np.ndarray,
+) -> dict[str, str]:
+    ts = datetime.now(timezone.utc)
+    target_dir = VIOLATIONS_DIR / ts.strftime("%Y-%m-%d") / violation_id
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    full_frame_path = target_dir / "full_frame.jpg"
+    vehicle_crop_path = target_dir / "vehicle_crop.jpg"
+    plate_raw_path = target_dir / "plate_raw.jpg"
+    plate_enhanced_path = target_dir / "plate_enhanced.jpg"
+    thumbnail_path = target_dir / "thumbnail.jpg"
+
+    cv2.imwrite(str(full_frame_path), frame)
+    cv2.imwrite(str(vehicle_crop_path), vehicle_crop)
+    cv2.imwrite(str(plate_raw_path), plate_raw)
+    cv2.imwrite(str(plate_enhanced_path), plate_enhanced)
+
+    thumb = cv2.resize(frame, (320, 180), interpolation=cv2.INTER_AREA)
+    cv2.imwrite(str(thumbnail_path), thumb)
+
+    return {
+        "full_frame": str(full_frame_path.resolve()),
+        "vehicle_crop": str(vehicle_crop_path.resolve()),
+        "plate_crop_raw": str(plate_raw_path.resolve()),
+        "plate_crop_enhanced": str(plate_enhanced_path.resolve()),
+        "thumbnail": str(thumbnail_path.resolve()),
+    }
 
 
 def select_runtime_mode(lab_cfg: dict[str, Any]) -> str:
@@ -451,6 +486,13 @@ def run_smoke(video_source: str | int = 0, max_frames: int = 60) -> None:
 
                     violation_id = f"v-{int(now)}-{track_id}"
                     timestamp = datetime.now(timezone.utc).isoformat()
+                    evidence_paths = save_violation_evidence(
+                        violation_id=violation_id,
+                        frame=frame,
+                        vehicle_crop=crop,
+                        plate_raw=plate,
+                        plate_enhanced=enhanced,
+                    )
                     payload = {
                         "violation_id": violation_id,
                         "timestamp": timestamp,
@@ -465,10 +507,13 @@ def run_smoke(video_source: str | int = 0, max_frames: int = 60) -> None:
                             "vehicle_class": class_key,
                             "estimated_speed_kmph": round(speed, 2),
                             "track_id": int(track_id),
+                            "detected_color": "unknown",
+                            "detected_type": class_key,
                         },
+                        "evidence": evidence_paths,
                     }
                     sync_client.send_violation(payload)
-                    sync_client.upload_evidence(violation_id, b"dummy", b"dummy")
+                    sync_client.upload_evidence(violation_id, b"ready", b"ready")
 
         latency_ms = (time.time() - t0) * 1000
         export_preview_frame(annotated)

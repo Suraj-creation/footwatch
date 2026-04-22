@@ -9,6 +9,8 @@ const DashboardPage = lazy(async () => ({ default: (await import('@/pages/Dashbo
 const CameraLabPage = lazy(async () => ({ default: (await import('@/pages/CameraLabPage')).CameraLabPage }))
 const LivePage = lazy(async () => ({ default: (await import('@/pages/LivePage')).LivePage }))
 const ViolationsPage = lazy(async () => ({ default: (await import('@/pages/ViolationsPage')).ViolationsPage }))
+const ChallansPage = lazy(async () => ({ default: (await import('@/pages/ChallansPage')).ChallansPage }))
+const ChallanDetailsPage = lazy(async () => ({ default: (await import('@/pages/ChallanDetailsPage')).ChallanDetailsPage }))
 const ViolationDetailsPage = lazy(
   async () => ({ default: (await import('@/pages/ViolationDetailsPage')).ViolationDetailsPage }),
 )
@@ -20,6 +22,8 @@ export const routeConfig: RouteItem[] = [
   { path: '/camera-lab', component: CameraLabPage },
   { path: '/live', component: LivePage },
   { path: '/violations', component: ViolationsPage },
+  { path: '/challans', component: ChallansPage },
+  { path: '/challans/:id', component: ChallanDetailsPage },
   { path: '/violations/:id', component: ViolationDetailsPage },
   { path: '/system-health', component: SystemHealthPage },
   { path: '*', component: NotFoundPage },

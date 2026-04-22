@@ -5,6 +5,7 @@ const titleMap: Record<string, string> = {
   '/camera-lab': 'Camera Configuration Lab',
   '/live': 'Live Camera Monitoring',
   '/violations': 'Violation Records',
+  '/challans': 'e-Challan Management',
   '/system-health': 'System Health',
 }
 

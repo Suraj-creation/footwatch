@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["violation_type", "location"],
+  "anyOf": [
+    { "required": ["image_base64"] },
+    { "required": ["image_path"] }
+  ],
+  "properties": {
+    "violation_id": { "type": "string" },
+    "violation_type": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "image_base64": { "type": "string", "minLength": 1 },
+    "image_path": { "type": "string", "minLength": 1 },
+    "fine_amount_inr": { "type": "number", "minimum": 0 },
+    "location": {
+      "type": "object",
+      "required": ["camera_id"],
+      "properties": {
+        "camera_id": { "type": "string", "minLength": 1 },
+        "location_name": { "type": "string" },
+        "gps_lat": { "type": "number" },
+        "gps_lng": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "vehicle": {
+      "type": "object",
+      "properties": {
+        "plate_number": { "type": "string" },
+        "plate_ocr_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "vehicle_class": { "type": "string" },
+        "vehicle_type": { "type": "string" },
+        "vehicle_color": { "type": "string" },
+        "estimated_speed_kmph": { "type": "number", "minimum": 0 },
+        "track_id": { "type": "integer" }
+      },
+      "additionalProperties": true
+    },
+    "context": { "type": "object" }
+  },
+  "additionalProperties": true
+}

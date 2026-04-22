@@ -10,7 +10,9 @@ from services.common.auth import validate_ingest_api_key
 from services.common.errors import ApiError
 from services.common.logger import get_logger
 from services.common.response import created, ok
+from services.ingest_api.handlers.post_detect_violation import handle_post_detect_violation
 from services.ingest_api.handlers.post_evidence_complete import handle_post_evidence_complete
+from services.ingest_api.handlers.post_generate_challan import handle_post_generate_challan
 from services.ingest_api.handlers.post_telemetry import handle_post_telemetry
 from services.ingest_api.handlers.post_violation import handle_post_violation
 from services.ingest_api.repositories.camera_live_state_repo import CameraLiveStateRepository
@@ -64,3 +66,49 @@ def post_evidence_complete(
     logger.info("evidence_complete violation_id=%s", violation_id)
     result = handle_post_evidence_complete(violation_id, payload)
     return ok(result, request_id)
+
+
+@app.post("/detect-violation", status_code=201)
+@app.post("/v1/detect-violation", status_code=201)
+def post_detect_violation(
+    payload: Dict[str, Any],
+    x_api_key: Optional[str] = Header(default=None),
+    x_idempotency_key: Optional[str] = Header(default=None),
+):
+    validate_ingest_api_key(x_api_key)
+    request_id = str(uuid.uuid4())
+
+    try:
+        result = handle_post_detect_violation(payload, x_idempotency_key, idempotency_repo)
+    except ValueError as exc:
+        raise ApiError(400, "invalid_payload", str(exc)) from exc
+    except ApiError:
+        raise
+    except Exception as exc:
+        raise ApiError(500, "challan_pipeline_failed", str(exc)) from exc
+
+    logger.info("detect_violation violation_id=%s", result.get("violation_id"))
+    return created(result, request_id)
+
+
+@app.post("/generate-challan", status_code=201)
+@app.post("/v1/generate-challan", status_code=201)
+def post_generate_challan(
+    payload: Dict[str, Any],
+    x_api_key: Optional[str] = Header(default=None),
+    x_idempotency_key: Optional[str] = Header(default=None),
+):
+    validate_ingest_api_key(x_api_key)
+    request_id = str(uuid.uuid4())
+
+    try:
+        result = handle_post_generate_challan(payload, x_idempotency_key, idempotency_repo)
+    except ValueError as exc:
+        raise ApiError(400, "invalid_payload", str(exc)) from exc
+    except ApiError:
+        raise
+    except Exception as exc:
+        raise ApiError(500, "challan_generation_failed", str(exc)) from exc
+
+    logger.info("generate_challan violation_id=%s", result.get("violation_id"))
+    return created(result, request_id)

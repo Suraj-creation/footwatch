@@ -5,6 +5,18 @@ info:
 servers:
   - url: http://localhost:8000
 paths:
+  /detect-violation:
+    post:
+      summary: Detect violation and auto-generate challan
+      responses:
+        '201':
+          description: Challan generated
+  /generate-challan:
+    post:
+      summary: Generate challan from provided extracted metadata
+      responses:
+        '201':
+          description: Challan generated
   /v1/telemetry:
     post:
       summary: Ingest live camera telemetry
@@ -122,3 +134,34 @@ paths:
       responses:
         '200':
           description: Camera state list
+  /challans:
+    get:
+      summary: List challans with filters
+      parameters:
+        - name: plate_number
+          in: query
+          schema:
+            type: string
+        - name: challan_id
+          in: query
+          schema:
+            type: string
+        - name: violation_type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Challan list
+  /challan/{id}:
+    get:
+      summary: Get challan details by challan id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Challan details

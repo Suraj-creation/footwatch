@@ -11,6 +11,25 @@
     "review_required": { "type": "boolean" },
     "review_reason": { "type": ["string", "null"] },
     "evidence_status": { "type": "string" },
+    "challan": {
+      "type": "object",
+      "properties": {
+        "challan_id": { "type": "string" },
+        "violation_id": { "type": "string" },
+        "plate_number": { "type": "string" },
+        "vehicle_type": { "type": "string" },
+        "vehicle_color": { "type": "string" },
+        "violation_type": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "image_url": { "type": "string" },
+        "fine_amount": { "type": "number", "minimum": 0 },
+        "status": { "type": "string" },
+        "pdf_path": { "type": "string" },
+        "html_path": { "type": "string" },
+        "pdf_generated": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
     "created_at": { "type": "string", "format": "date-time" },
     "updated_at": { "type": "string", "format": "date-time" }
   },

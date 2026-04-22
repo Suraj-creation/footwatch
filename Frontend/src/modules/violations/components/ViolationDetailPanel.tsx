@@ -14,6 +14,8 @@ const fields = (v: Violation) => [
   { label: 'Plate Number', value: formatPlate(v.vehicle.plate_number) },
   { label: 'Speed', value: formatSpeed(v.vehicle.estimated_speed_kmph) },
   { label: 'Vehicle Class', value: v.vehicle.vehicle_class ?? 'N/A' },
+  { label: 'Detected Color', value: v.vehicle.detected_color ?? v.vehicle_enrichment?.vehicle_color ?? 'unknown' },
+  { label: 'Detected Type', value: v.vehicle.detected_type ?? v.vehicle_enrichment?.vehicle_type ?? 'unknown' },
   { label: 'Track ID', value: v.vehicle.track_id ?? 'N/A' },
   { label: 'Camera', value: v.location.camera_id ?? 'N/A' },
   { label: 'Location', value: v.location.location_name ?? 'N/A' },
@@ -24,6 +26,7 @@ const fields = (v: Violation) => [
 export function ViolationDetailPanel({ violation }: ViolationDetailPanelProps) {
   const confidence = violation.vehicle.plate_ocr_confidence
   const plateValid = violation.vehicle.plate_format_valid
+  const enrichmentConfidence = violation.vehicle_enrichment?.confidence
 
   return (
     <section className="section-card" id="violation-detail-panel">
@@ -51,6 +54,13 @@ export function ViolationDetailPanel({ violation }: ViolationDetailPanelProps) {
           <span className="detail-label">Plate Format</span>
           <Badge tone={plateValid ? 'success' : 'danger'}>
             {plateValid ? '✓ Valid' : '✗ Invalid'}
+          </Badge>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">AI Enrichment</span>
+          <Badge tone={violation.vehicle_enrichment?.source === 'gemini' ? 'success' : 'warning'}>
+            {violation.vehicle_enrichment?.source ?? 'fallback'}
+            {typeof enrichmentConfidence === 'number' ? ` (${enrichmentConfidence.toFixed(2)})` : ''}
           </Badge>
         </div>
       </div>

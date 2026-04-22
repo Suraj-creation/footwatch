@@ -322,6 +322,7 @@ export function CameraLabPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshDevices(false)
     void loadConfigFromBackend()
     void fetchEdgeRuntimeStatus()

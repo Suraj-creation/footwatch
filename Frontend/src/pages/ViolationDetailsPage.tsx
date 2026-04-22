@@ -3,6 +3,8 @@ import { AppShell } from '@/app/layout/AppShell'
 import { EvidenceViewer } from '@/modules/violations/components/EvidenceViewer'
 import { ViolationDetailPanel } from '@/modules/violations/components/ViolationDetailPanel'
 import { useViolationDetailsQuery } from '@/modules/violations/hooks/useViolationDetailsQuery'
+import { endpoints } from '@/shared/api/endpoints'
+import { env } from '@/shared/config/env'
 import { DataState } from '@/shared/components/DataState'
 
 export function ViolationDetailsPage() {
@@ -20,7 +22,18 @@ export function ViolationDetailsPage() {
           <span className="section-icon">📋</span>
           <h2 style={{ marginBottom: 0 }}>Violation Details</h2>
           {query.data && (
-            <span className="pill" style={{ marginLeft: 'auto' }}>{query.data.violation_id.slice(0, 8)}</span>
+            <>
+              {query.data.challan ? (
+                <a
+                  href={`${env.VITE_API_BASE_URL}${endpoints.violationChallanDownload(query.data.violation_id)}`}
+                  className="btn-primary"
+                  style={{ marginLeft: 'auto', marginRight: '0.75rem' }}
+                >
+                  Download e-Challan
+                </a>
+              ) : null}
+              <span className="pill">{query.data.violation_id.slice(0, 8)}</span>
+            </>
           )}
         </div>
 

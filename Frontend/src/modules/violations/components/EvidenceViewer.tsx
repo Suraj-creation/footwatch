@@ -8,8 +8,9 @@ type EvidenceViewerProps = {
 
 const evidenceTypes = [
   { key: 'full_frame', label: 'Full Frame', icon: '🖼️' },
-  { key: 'plate_raw', label: 'Plate (Raw)', icon: '📷' },
-  { key: 'plate_enhanced', label: 'Plate (Enhanced)', icon: '✨' },
+  { key: 'vehicle_crop', label: 'Vehicle Crop', icon: '🚗' },
+  { key: 'plate_crop_raw', label: 'Plate (Raw)', icon: '📷' },
+  { key: 'plate_crop_enhanced', label: 'Plate (Enhanced)', icon: '✨' },
   { key: 'thumbnail', label: 'Thumbnail', icon: '📐' },
 ] as const
 

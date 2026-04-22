@@ -5,6 +5,7 @@ const navItems = [
   { to: '/camera-lab', label: 'Camera Lab', icon: '🎛️' },
   { to: '/live', label: 'Live Cameras', icon: '📹' },
   { to: '/violations', label: 'Violations', icon: '🚨' },
+  { to: '/challans', label: 'e-Challans', icon: '🧾' },
   { to: '/system-health', label: 'System Health', icon: '💻' },
 ]
 

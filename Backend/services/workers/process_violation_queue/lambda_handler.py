@@ -3,9 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List
 
-from services.workers.process_violation_queue.handler import process_queue_once
-from services.workers.process_violation_queue.services.alert_publisher import publish_alert
-from services.workers.process_violation_queue.services.violation_normalizer import normalize_violation
+from services.workers.process_violation_queue.handler import process_queue_once, process_violation_payload
 from services.workers.process_violation_queue.services.violation_persister import ViolationPersister
 
 
@@ -18,10 +16,13 @@ def _process_records(records: List[Dict[str, Any]]) -> int:
         if raw_body is None:
             continue
 
-        payload = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
-        normalized = normalize_violation(payload)
-        persister.persist(normalized)
-        publish_alert(normalized)
+        try:
+            payload = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
+        except Exception:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        process_violation_payload(payload, persister)
         processed += 1
 
     return processed
